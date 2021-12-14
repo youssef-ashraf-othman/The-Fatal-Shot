@@ -1,1 +1,9 @@
-
+import pygame
+pygame.init()
+pygame.display.set_mode((700, 500))             #window size
+pygame.display.set_caption("The Fatal Shot")      # label of window
+while True:                                     #use while loop to make window stable
+    pygame.time.delay(100)                      #after each 100ms, process user input
+    for i in pygame.event.get():                   #this is list get all actions that user did during last 100ms ... user action would be stored in pygame event
+        if i.type == pygame.QUIT:
+            quit()
