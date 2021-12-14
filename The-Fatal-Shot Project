@@ -1,9 +1,34 @@
 import pygame
 pygame.init()
-pygame.display.set_mode((700, 500))             #window size
+screenWidth = 700
+screenHeight = 500
+screen = pygame.display.set_mode((screenWidth, screenHeight))             #window size ... variable
 pygame.display.set_caption("The Fatal Shot")      # label of window
+
+# RGB Color
+x = 100   # Movement in Horizontal (Default Position)
+y = 200   # Movement in vertical   (Default Position)
+width = 50
+height = 50
+step = 50  # step is the magnitude of the Displacement
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
 while True:                                     #use while loop to make window stable
     pygame.time.delay(100)                      #after each 100ms, process user input
     for i in pygame.event.get():                   #this is list get all actions that user did during last 100ms ... user action would be stored in pygame event
         if i.type == pygame.QUIT:
             quit()
+    keys = pygame.key.get_pressed()                           #It's dectionary recive all actions that user did when pressed on buttons to move rectangle
+    # Movement Buttons
+    if keys[pygame.K_LEFT] and x - step >= 0:           # x - step >= 0 until not to move outside the window
+        x -= step
+    if keys[pygame.K_RIGHT] and x + step + width <= screenWidth:
+        x += step
+    if keys[pygame.K_UP] and y - step >= 0:
+        y -= step
+    if keys[pygame.K_DOWN] and y + step + height <= screenHeight:
+        y += step
+    screen.fill(BLACK) # Clear the Effect of moving of rectangle
+    pygame.draw.rect(screen, RED, (x, y, width, height))           #Draw rectangle in Window at point(x, y) from (0, 0) ... (0, 0) = most of top-left
+    pygame.display.update()            # update the window with new additions
