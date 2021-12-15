@@ -36,6 +36,8 @@ class Player(): #became easier of want to add more characters
         self.speed = 10
         self.isJumping = False
         self.standing = True
+        self.hitbox = (self.x + 20, self.y + 10, self.height - 40, self.width - 20)#hitbox is a rectangle with start, end, width and height
+
     def draw(self, screen): #Display Character
         if not self.standing:
             if self.left:
@@ -55,6 +57,9 @@ class Player(): #became easier of want to add more characters
             else:
                 screen.blit(move_left[0], (self.x, self.y))
             #screen.blit(hero, (self.x, self.y))  # fixed hero look at you!
+        self.hitbox = (self.x + 20, self.y + 10, self.width - 40, self.height - 20)
+        pygame.draw.rect(screen, RED, self.hitbox, 2) #width = 2
+
 class Bullet: #The bullet is a circle
     def __init__(self, x, y, radius, color, direction, step):
         self.x = x
@@ -77,6 +82,8 @@ class Enemy:#enemy will move to left and right automatically from (x) to (end)
         self.start = x #because we will modify the value of (x)
         self.step = 3
         self.moves = 0
+        self.hitbox = (self.x + 20, self.y + 10, self.height - 40,self.width - 20)  # hitbox is a rectangle with start, end, width and height
+
     def draw(self, screen):
         self.move()
         if self.step < 0:
@@ -90,6 +97,9 @@ class Enemy:#enemy will move to left and right automatically from (x) to (end)
             self.moves += 1
             if self.moves == 11 * 2:  # we have 11 photos for each direction
                 self.moves = 0
+
+        self.hitbox = (self.x + 20, self.y + 10, self.width - 40, self.height - 20)
+        pygame.draw.rect(screen, RED, self.hitbox, 2)  # width = 2
 
     def move(self): #The same as hero
         if self.step > 0:
@@ -123,8 +133,8 @@ def redrawGame():
     global moves
     #screen.fill(BLACK)  # Clear the Effect of moving of rectangle
     screen.blit(backgroundImage, (0, 0))  # Background and its position
-    man.draw(screen) #Display hero
     enemy.draw(screen) #Display enemy
+    man.draw(screen)  # Display hero
     for bullet in bullets: #Display many of bullets
         bullet.draw(screen)
 
