@@ -29,20 +29,39 @@ class Player(): #became easier of want to add more characters
         self.moves = 0
         self.speed = 10
         self.isJumping = False
+        self.standing = True
     def draw(self, screen): #Display Character
-        if self.left:
-            screen.blit(move_left[self.moves // 2], (self.x, self.y))
-            self.moves += 1
-            if self.moves == 18:  # we have 9 photos for each direction
-                self.moves = 0
+        if not self.standing:
+            if self.left:
+                screen.blit(move_left[self.moves // 2], (self.x, self.y))
+                self.moves += 1
+                if self.moves == 18:  # we have 9 photos for each direction
+                    self.moves = 0
 
-        elif self.right:
-            screen.blit(move_right[self.moves // 2], (self.x, self.y))
-            self.moves += 1
-            if self.moves == 18:  # we have 9 photos for each direction
-                self.moves = 0
+            elif self.right:
+                screen.blit(move_right[self.moves // 2], (self.x, self.y))
+                self.moves += 1
+                if self.moves == 18:  # we have 9 photos for each direction
+                    self.moves = 0
         else:
-            screen.blit(hero, (self.x, self.y))  # fixed hero
+            if self.right:
+                screen.blit(move_right[0], (self.x, self.y))
+            else:
+                screen.blit(move_left[0], (self.x, self.y))
+            #screen.blit(hero, (self.x, self.y))  # fixed hero look at you!
+class Bullet: #The bullet is a circle
+    def __init__(self, x, y, radius, color, direction, step):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.color = color
+        self.direction = direction #-1 to left and 1 to right
+        self.step = step * direction
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
+
+
 
 man = Player(10, 484, 64, 64)
 # x = 10   # Movement in Horizontal (Default Position)
@@ -58,16 +77,21 @@ man = Player(10, 484, 64, 64)
 # isJumping = False #status of Jumping
 
 
-def redrawGame(): 
+def redrawGame():
     global moves
     #screen.fill(BLACK)  # Clear the Effect of moving of rectangle
     screen.blit(backgroundImage, (0, 0))  # Background and its position
     man.draw(screen)
-
+    for bullet in bullets: #Display many of bullets
+        bullet.draw(screen)
 
     #pygame.draw.rect(screen, RED, (x, y, width, height))  # Draw rectangle in Window at point(x, y) from (0, 0) ... (0, 0) = most of top-left
 
     pygame.display.update()  # update the window with new additions
+
+
+bullets = []#to be able to hit more than one bullet ... it is empty and filled with Bullet object
+#main loop
 while True:                                     #use while loop to make window stable
     #pygame.time.delay(50)      #after each 50ms, process user input ... The lower you go, the faster the movement speed
     clock.tick(30) #FBS = 50 rather than delay(50)
@@ -76,18 +100,38 @@ while True:                                     #use while loop to make window s
         if i.type == pygame.QUIT:
             quit()
     keys = pygame.key.get_pressed()                           #It's dectionary recive all actions that user did when pressed on buttons to move rectangle
+
     # Movement Buttons
+
+    for bullet in bullets:
+        if bullet.x < screenWidth and bullet.x > 0: #inside the screen
+            bullet.x += bullet.step
+        else:
+            bullets.remove(bullet)
+
+
+    if keys[pygame.K_z]: #hit bullets
+        if len(bullets) < 5: #make limit of Bullets
+            direction = 1
+            if man.left:
+                direction = -1
+            else:
+                direction = 1
+            bullets.append(Bullet(round(man.x + man.width // 2), round(man.y + man.height // 2), 5, RED, direction, 10))
+
+
     if keys[pygame.K_LEFT] and man.x - man.step >= 0:           # x - step >= 0 until not to move outside the window
         man.x -= man.step
         man.right = False
         man.left = True
+        man.standing = False
     elif keys[pygame.K_RIGHT] and man.x + man.step + man.width <= screenWidth:
         man.x += man.step
         man.right = True
         man.left = False
+        man.standing = False
     else:
-        man.right = False
-        man.left = False
+        man.standing = True
         man.moves = 0
     if not man.isJumping: # During Jumping, he can't move to up or down
         # Don't need vertical movement
