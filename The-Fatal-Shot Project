@@ -11,39 +11,58 @@ screenHeight = 640
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((screenWidth, screenHeight))             #window size ... variable
 pygame.display.set_caption("The Fatal Shot")      # label of window
-
 # RGB Color
-x = 10   # Movement in Horizontal (Default Position)
-y = 484   # Movement in vertical   (Default Position)
-width = 64 #because size of hero = 64
-height = 64
-left = False # Status of direction
-right = False
-moves = 0
-step = 6  # step is the magnitude of the Displacement and speed of hero movement
-speed = 10 # using for jumping (distance of jumping)
-isJumping = False #status of Jumping
-
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
-def redrawGame(): # Replace it with OOP
+
+
+class Player(): #became easier of want to add more characters
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.step = 6
+        self.left = False
+        self.right = False
+        self.moves = 0
+        self.speed = 10
+        self.isJumping = False
+    def draw(self, screen): #Display Character
+        if self.left:
+            screen.blit(move_left[self.moves // 2], (self.x, self.y))
+            self.moves += 1
+            if self.moves == 18:  # we have 9 photos for each direction
+                self.moves = 0
+
+        elif self.right:
+            screen.blit(move_right[self.moves // 2], (self.x, self.y))
+            self.moves += 1
+            if self.moves == 18:  # we have 9 photos for each direction
+                self.moves = 0
+        else:
+            screen.blit(hero, (self.x, self.y))  # fixed hero
+
+man = Player(10, 484, 64, 64)
+# x = 10   # Movement in Horizontal (Default Position)
+# y = 484   # Movement in vertical   (Default Position)
+# width = 64 #because size of hero = 64
+# height = 64
+# Used in Player() Class
+# left = False # Status of direction
+# right = False
+# moves = 0
+# step = 6  # step is the magnitude of the Displacement and speed of hero movement
+# speed = 10 # using for jumping (distance of jumping)
+# isJumping = False #status of Jumping
+
+
+def redrawGame(): 
+    global moves
     #screen.fill(BLACK)  # Clear the Effect of moving of rectangle
     screen.blit(backgroundImage, (0, 0))  # Background and its position
-    global moves
-    if left:
-        screen.blit(move_left[moves // 2], (x, y))
-        moves += 1
-        if moves == 18: # we have 9 photos for each direction
-            moves = 0
-
-    elif right:
-        screen.blit(move_right[moves // 2], (x, y))
-        moves += 1
-        if moves == 18: # we have 9 photos for each direction
-            moves = 0
-    else:
-        screen.blit(hero, (x, y)) #fixed hero
+    man.draw(screen)
 
 
     #pygame.draw.rect(screen, RED, (x, y, width, height))  # Draw rectangle in Window at point(x, y) from (0, 0) ... (0, 0) = most of top-left
@@ -58,35 +77,35 @@ while True:                                     #use while loop to make window s
             quit()
     keys = pygame.key.get_pressed()                           #It's dectionary recive all actions that user did when pressed on buttons to move rectangle
     # Movement Buttons
-    if keys[pygame.K_LEFT] and x - step >= 0:           # x - step >= 0 until not to move outside the window
-        x -= step
-        right = False
-        left = True
-    elif keys[pygame.K_RIGHT] and x + step + width <= screenWidth:
-        x += step
-        right = True
-        left = False
+    if keys[pygame.K_LEFT] and man.x - man.step >= 0:           # x - step >= 0 until not to move outside the window
+        man.x -= man.step
+        man.right = False
+        man.left = True
+    elif keys[pygame.K_RIGHT] and man.x + man.step + man.width <= screenWidth:
+        man.x += man.step
+        man.right = True
+        man.left = False
     else:
-        right = False
-        left = False
-        moves = 0
-    if not isJumping: # During Jumping, he can't move to up or down
+        man.right = False
+        man.left = False
+        man.moves = 0
+    if not man.isJumping: # During Jumping, he can't move to up or down
         # Don't need vertical movement
         # if keys[pygame.K_UP] and y - step >= 0:
         #     y -= step
         # if keys[pygame.K_DOWN] and y + step + height <= screenHeight:
         #     y += step
         if keys[pygame.K_SPACE]:
-            isJumping = True
+            man.isJumping = True
     else:                       #in case Jumping
-        if speed >= -10:
+        if man.speed >= -10:
             neg = 1
-            if speed < 0:
+            if man.speed < 0:
                 neg = -1
-            y -= (speed ** 2) * 0.3 * neg
-            speed -= 1
+            man.y -= (man.speed ** 2) * 0.3 * neg
+            man.speed -= 1
         else:
-            speed = 10 #reset for next Jump
-            isJumping = False
+            man.speed = 10 #reset for next Jump
+            man.isJumping = False
 
     redrawGame()
