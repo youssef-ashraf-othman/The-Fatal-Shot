@@ -4,23 +4,23 @@ move_right = [pygame.image.load("hero/R1.png"), pygame.image.load("hero/R2.png")
 move_left = [pygame.image.load("hero/L1.png"), pygame.image.load("hero/L2.png"), pygame.image.load("hero/L3.png"), pygame.image.load("hero/L4.png"), pygame.image.load("hero/L5.png"), pygame.image.load("hero/L6.png"), pygame.image.load("hero/L7.png"), pygame.image.load("hero/L8.png"), pygame.image.load("hero/L9.png")]
 
 
-backgroundImage = pygame.image.load("bg1.jpg")
+backgroundImage = pygame.image.load("bg8.png")
 hero = pygame.image.load("hero/standing.png")
-screenWidth = 700
-screenHeight = 500
+screenWidth = 1280
+screenHeight = 640
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((screenWidth, screenHeight))             #window size ... variable
 pygame.display.set_caption("The Fatal Shot")      # label of window
 
 # RGB Color
 x = 10   # Movement in Horizontal (Default Position)
-y = 400   # Movement in vertical   (Default Position)
+y = 484   # Movement in vertical   (Default Position)
 width = 64 #because size of hero = 64
 height = 64
 left = False # Status of direction
 right = False
 moves = 0
-step = 5  # step is the magnitude of the Displacement and speed of hero movement
+step = 6  # step is the magnitude of the Displacement and speed of hero movement
 speed = 10 # using for jumping (distance of jumping)
 isJumping = False #status of Jumping
 
@@ -44,6 +44,7 @@ def redrawGame(): # Replace it with OOP
             moves = 0
     else:
         screen.blit(hero, (x, y)) #fixed hero
+
 
     #pygame.draw.rect(screen, RED, (x, y, width, height))  # Draw rectangle in Window at point(x, y) from (0, 0) ... (0, 0) = most of top-left
 
