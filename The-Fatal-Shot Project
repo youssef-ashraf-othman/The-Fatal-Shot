@@ -10,12 +10,15 @@ x = 100   # Movement in Horizontal (Default Position)
 y = 200   # Movement in vertical   (Default Position)
 width = 50
 height = 50
-step = 50  # step is the magnitude of the Displacement
+step = 10  # step is the magnitude of the Displacement
+speed = 10 # using for jumping (distance of jumping)
+isJumping = False #status of Jumping
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 while True:                                     #use while loop to make window stable
-    pygame.time.delay(100)                      #after each 100ms, process user input
+    pygame.time.delay(50)      #after each 100ms, process user input ... The lower you go, the faster the movement speed
     for i in pygame.event.get():                   #this is list get all actions that user did during last 100ms ... user action would be stored in pygame event
         if i.type == pygame.QUIT:
             quit()
@@ -25,10 +28,24 @@ while True:                                     #use while loop to make window s
         x -= step
     if keys[pygame.K_RIGHT] and x + step + width <= screenWidth:
         x += step
-    if keys[pygame.K_UP] and y - step >= 0:
-        y -= step
-    if keys[pygame.K_DOWN] and y + step + height <= screenHeight:
-        y += step
+    if not isJumping: # During Jumping, he can't move to up or down
+        if keys[pygame.K_UP] and y - step >= 0:
+            y -= step
+        if keys[pygame.K_DOWN] and y + step + height <= screenHeight:
+            y += step
+        if keys[pygame.K_SPACE]:
+            isJumping = True
+    else:                       #in case Jumping
+        if speed >= -10:
+            neg = 1
+            if speed < 0:
+                neg = -1
+            y -= (speed ** 2) * 0.3 * neg
+            speed -= 1
+        else:
+            speed = 10 #reset for next Jump
+            isJumping = False
+
     screen.fill(BLACK) # Clear the Effect of moving of rectangle
     pygame.draw.rect(screen, RED, (x, y, width, height))           #Draw rectangle in Window at point(x, y) from (0, 0) ... (0, 0) = most of top-left
     pygame.display.update()            # update the window with new additions
