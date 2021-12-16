@@ -12,6 +12,9 @@ move_leftE = [pygame.image.load("enemy/L1E.png"), pygame.image.load("enemy/L2E.p
 
 backgroundImage = pygame.image.load("bg8.png")
 hero = pygame.image.load("hero/standing.png")
+score = 0
+bulletSound = pygame.mixer.Sound("sounds/bullet.wav")
+hitSound = pygame.mixer.Sound("sounds/hit.wav")
 screenWidth = 1280
 screenHeight = 640
 clock = pygame.time.Clock()
@@ -21,12 +24,20 @@ pygame.display.set_caption("The Fatal Shot")      # label of window
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+TEAL = (152,251,152)
+OLIVE = (128,128,0)
+YELLOW = (255,255,0)
+GREEN = (0, 100, 0)
 
 
 class Player(): #became easier of want to add more characters
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
+
+        self.start_x = x #for collision
+        self.start_y = y #for collision
+
         self.width = width
         self.height = height
         self.step = 6
@@ -58,7 +69,23 @@ class Player(): #became easier of want to add more characters
                 screen.blit(move_left[0], (self.x, self.y))
             #screen.blit(hero, (self.x, self.y))  # fixed hero look at you!
         self.hitbox = (self.x + 20, self.y + 10, self.width - 40, self.height - 20)
-        pygame.draw.rect(screen, RED, self.hitbox, 2) #width = 2
+        #pygame.draw.rect(screen, TEAL, self.hitbox, 2) #width = 2 ...  # width = 2 # We no longer need to show it
+    def hit(self):
+        self.x = self.start_x
+        self.y = self.start_y
+        self.moves = 0
+        font1 = pygame.font.SysFont("segoeui", 95)
+        text = font1.render("-6", 1, RED)
+        screen.blit(text, (screenWidth // 2 - 2, 200))
+        pygame.display.update()
+        #make small mainloop
+        i = 0
+        while i < 200:
+            i += 1
+            pygame.time.delay(20)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    quit()
 
 class Bullet: #The bullet is a circle
     def __init__(self, x, y, radius, color, direction, step):
@@ -83,23 +110,27 @@ class Enemy:#enemy will move to left and right automatically from (x) to (end)
         self.step = 3
         self.moves = 0
         self.hitbox = (self.x + 20, self.y + 10, self.height - 40,self.width - 20)  # hitbox is a rectangle with start, end, width and height
+        self.health = 10
+        self.visible = True #status of enemy
+
 
     def draw(self, screen):
-        self.move()
-        if self.step < 0:
-            screen.blit(move_leftE[self.moves // 2], (self.x, self.y))
-            self.moves += 1
-            if self.moves == 11 * 2:  # we have 11 photos for each direction
-                self.moves = 0
+        if self.visible:
+            self.move()
+            if self.step < 0:
+                screen.blit(move_leftE[self.moves // 2], (self.x, self.y))
+                self.moves += 1
+                if self.moves == 11 * 2:  # we have 11 photos for each direction
+                    self.moves = 0
 
-        else:
-            screen.blit(move_rightE[self.moves // 2], (self.x, self.y))
-            self.moves += 1
-            if self.moves == 11 * 2:  # we have 11 photos for each direction
-                self.moves = 0
+            else:
+                screen.blit(move_rightE[self.moves // 2], (self.x, self.y))
+                self.moves += 1
+                if self.moves == 11 * 2:  # we have 11 photos for each direction
+                    self.moves = 0
 
-        self.hitbox = (self.x + 20, self.y + 10, self.width - 40, self.height - 20)
-        pygame.draw.rect(screen, RED, self.hitbox, 2)  # width = 2
+            pygame.draw.rect(screen, RED, (self.hitbox[0] - 15, self.hitbox[1] - 17, 60, 15))   #ractangle above the enemy represented as health bar
+            pygame.draw.rect(screen, YELLOW, (self.hitbox[0] - 15, self.hitbox[1] - 17, self.health * 6, 15))
 
     def move(self): #The same as hero
         if self.step > 0:
@@ -112,6 +143,15 @@ class Enemy:#enemy will move to left and right automatically from (x) to (end)
                 self.step *= -1
             else:
                 self.x += self.step
+        self.hitbox = (self.x + 20, self.y + 10, self.width - 40, self.height - 20)
+
+        #pygame.draw.rect(screen, GREEN, self.hitbox, 2)  # width = 2 # We no longer need to show it
+    def hit(self):
+        hitSound.play()
+        self.health -= 1
+        if self.health == 0:
+            self.visible = False
+        print("hit")
 
 
 man = Player(1200, 484, 64, 64)
@@ -128,11 +168,19 @@ enemy = Enemy(10, 484, 64, 64, 1000)
 # speed = 10 # using for jumping (distance of jumping)
 # isJumping = False #status of Jumping
 
+font = pygame.font.SysFont("segoeui", 60, True)#the font that show the score om screen
 
-def redrawGame():
+def redrawGame():# Display every thing
     global moves
+
+    text = font.render("Score = " + str(score), True, OLIVE) #Change the color
+
+
     #screen.fill(BLACK)  # Clear the Effect of moving of rectangle
     screen.blit(backgroundImage, (0, 0))  # Background and its position
+
+    screen.blit(text, (480, 0)) #show scoring
+
     enemy.draw(screen) #Display enemy
     man.draw(screen)  # Display hero
     for bullet in bullets: #Display many of bullets
@@ -149,12 +197,25 @@ while True:                                     #use while loop to make window s
     #pygame.time.delay(50)      #after each 50ms, process user input ... The lower you go, the faster the movement speed
     clock.tick(30) #FBS = 50 rather than delay(50)
 
+    x_mid = (2 * man.hitbox[0] + man.hitbox[2]) // 2
+    y_mid = (2 * man.hitbox[1] + man.hitbox[3]) // 2
+
+    if x_mid > enemy.hitbox[0] and x_mid < enemy.hitbox[0] + enemy.hitbox[2]:  # hitting ... if bullet inside the hitbox of enemy () ... hitbox[2] = width
+        if y_mid > enemy.hitbox[1]:  # Is the bullet under the The enemy's top line?
+            score -= 6
+            man.hit()
+
+
+
     for event in pygame.event.get():                   #this is list get all actions that user did during last 100ms ... user action would be stored in pygame event
         if event.type == pygame.QUIT:
             quit()
         if event.type == pygame.KEYDOWN: #K_DOWN => when u press on some button
             if event.key ==  pygame.K_z:  # hit bullets
                 if len(bullets) < 5:  # make limit of Bullets
+
+                    bulletSound.play()
+
                     direction = 1
                     if man.left:
                         direction = -1
@@ -168,6 +229,13 @@ while True:                                     #use while loop to make window s
     # Movement Buttons
 
     for bullet in bullets:
+        if bullet.x > enemy.hitbox[0] and bullet.x < enemy.hitbox[0] + enemy.hitbox[2]:    #hitting ... if bullet inside the hitbox of enemy () ... hitbox[2] = width
+            if bullet.y > enemy.hitbox[1]: # Is the bullet under the The enemy's top line?
+                bullets.remove(bullet) #Because bullet hit the enemy ... remove = hide it
+                enemy.hit()
+                score += 1
+
+
         if bullet.x < screenWidth and bullet.x > 0: #inside the screen
             bullet.x += bullet.step
         else:
